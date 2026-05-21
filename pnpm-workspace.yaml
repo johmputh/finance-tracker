@@ -1,0 +1,13 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+allowBuilds:
+  "@nestjs/core": true
+  "@prisma/engines": true
+  prisma: true
+  "@tailwindcss/oxide": true
+  esbuild: true
+
+minimumReleaseAgeExclude:
+  - tsx@4.22.3

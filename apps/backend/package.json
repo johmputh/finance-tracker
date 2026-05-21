@@ -1,0 +1,34 @@
+{
+  "name": "@finance-tracker/backend",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "nest build",
+    "start": "dotenv -e ../../.env -- nest start",
+    "start:dev": "dotenv -e ../../.env -- nest start --watch",
+    "dev": "pnpm start:dev",
+    "start:prod": "dotenv -e ../../.env -- node dist/main.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@finance-tracker/database": "workspace:*",
+    "@finance-tracker/shared": "workspace:*",
+    "@nestjs/common": "^11.1.6",
+    "@nestjs/config": "^4.0.4",
+    "@nestjs/core": "^11.1.6",
+    "@nestjs/platform-express": "^11.1.6",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.10",
+    "@nestjs/schematics": "^11.0.7",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.1",
+    "dotenv-cli": "^8.0.0",
+    "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.6.3"
+  }
+}
