@@ -3,6 +3,7 @@ import type {
   PaginatedResponse,
   TransactionResponse,
   TransactionSummaryResponse,
+  UserResponse,
 } from "@finance-tracker/shared";
 
 const BASE = "/api";
@@ -42,6 +43,20 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  login: (data: { email: string; password: string }) =>
+    request<{ accessToken: string }>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  register: (data: { email: string; password: string; name: string }) =>
+    request<UserResponse>("/auth/register", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  getMe: () => request<UserResponse>("/auth/me"),
+
   getSummary: (month: number, year: number) =>
     request<TransactionSummaryResponse>(`/transactions/summary?month=${month}&year=${year}`),
 

@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { useAuth } from "../lib/auth";
 
 const navItems = [
   { to: "/", label: "แดชบอร์ด" },
@@ -7,6 +8,8 @@ const navItems = [
 ];
 
 export function Sidebar() {
+  const { user, logout } = useAuth();
+
   return (
     <aside className="w-56 shrink-0 bg-zinc-900 border-r border-zinc-800 p-4 flex flex-col">
       <h1 className="font-bold text-xl text-zinc-100 mb-8 tracking-tight font-kanit">
@@ -30,6 +33,20 @@ export function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      <div className="mt-auto pt-4 border-t border-zinc-800">
+        {user && (
+          <p className="text-xs text-zinc-500 px-3 mb-2 truncate" title={user.email}>
+            {user.name}
+          </p>
+        )}
+        <button
+          onClick={logout}
+          className="w-full text-left px-3 py-2 text-sm text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-colors duration-200"
+        >
+          ออกจากระบบ
+        </button>
+      </div>
     </aside>
   );
 }
