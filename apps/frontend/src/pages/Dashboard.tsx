@@ -146,7 +146,7 @@ export function Dashboard() {
       ) : (
         <div className="flex flex-col gap-6">
           {/* Summary cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <SummaryCard title="รายรับรวม" amount={summary?.totalIncome ?? 0} amountClass="text-emerald-400" />
             <SummaryCard title="รายจ่ายรวม" amount={summary?.totalExpense ?? 0} amountClass="text-rose-400" />
             <SummaryCard title="คงเหลือ" amount={summary?.balance ?? 0} amountClass="text-cyan-400" />

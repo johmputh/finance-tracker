@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import { Layout } from "./components/Layout";
 import { AuthProvider, useAuth } from "./lib/auth";
 import { Categories } from "./pages/Categories";
@@ -32,6 +33,19 @@ export function App() {
             </Route>
           </Route>
         </Routes>
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            duration: 3000,
+            style: {
+              background: "#27272a",
+              color: "#f4f4f5",
+              border: "1px solid #3f3f46",
+              borderRadius: "12px",
+              fontSize: "14px",
+            },
+          }}
+        />
       </AuthProvider>
     </BrowserRouter>
   );

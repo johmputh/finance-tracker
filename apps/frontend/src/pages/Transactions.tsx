@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import type { CategoryResponse, TransactionResponse } from "@finance-tracker/shared";
 import { Modal } from "../components/ui/Modal";
 import { api } from "../lib/api";
@@ -59,6 +60,11 @@ function TransactionForm({
   formError: string | null;
 }) {
   const [form, setForm] = useState<FormData>(initial);
+  const amountRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    amountRef.current?.focus();
+  }, []);
 
   const filteredCategories = useMemo(
     () => categories.filter((c) => c.type === form.type),
@@ -127,6 +133,7 @@ function TransactionForm({
       <div>
         <label className={labelClass}>จำนวนเงิน (บาท)</label>
         <input
+          ref={amountRef}
           type="number"
           min="0.01"
           step="0.01"
@@ -280,6 +287,7 @@ export function Transactions() {
       await api.deleteTransaction(deletingTx.id);
       setDeletingTx(null);
       fetchTransactions();
+      toast.success("ลบรายการสำเร็จ");
     } catch (err) {
       setError((err as Error).message);
     } finally {
