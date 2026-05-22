@@ -10,6 +10,7 @@ const navItems = [
   { to: "/", label: "แดชบอร์ด" },
   { to: "/transactions", label: "รายการ" },
   { to: "/categories", label: "หมวดหมู่" },
+  { to: "/profile", label: "โปรไฟล์" },
 ];
 
 export function Sidebar({ isOpen, onToggle }: SidebarProps) {

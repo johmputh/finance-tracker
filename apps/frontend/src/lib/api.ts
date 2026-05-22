@@ -57,6 +57,18 @@ export const api = {
 
   getMe: () => request<UserResponse>("/auth/me"),
 
+  updateProfile: (data: { name: string }) =>
+    request<UserResponse>("/auth/me", {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+
+  changePassword: (data: { currentPassword: string; newPassword: string }) =>
+    request<void>("/auth/me/password", {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+
   getSummary: (month: number, year: number) =>
     request<TransactionSummaryResponse>(`/transactions/summary?month=${month}&year=${year}`),
 

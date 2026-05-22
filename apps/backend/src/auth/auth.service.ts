@@ -1,7 +1,7 @@
-import { ConflictException, Injectable, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
-import type { LoginDto, RegisterDto, UserResponse } from "@finance-tracker/shared";
+import type { ChangePasswordDto, LoginDto, RegisterDto, UpdateProfileDto, UserResponse } from "@finance-tracker/shared";
 import { PrismaService } from "../prisma/prisma.service";
 import type { JwtPayload } from "./jwt-payload";
 
@@ -39,6 +39,22 @@ export class AuthService {
   async getProfile(userId: string): Promise<UserResponse> {
     const user = await this.prisma.client.user.findUniqueOrThrow({ where: { id: userId } });
     return this.toResponse(user);
+  }
+
+  async updateProfile(userId: string, dto: UpdateProfileDto): Promise<UserResponse> {
+    const user = await this.prisma.client.user.update({
+      where: { id: userId },
+      data: { name: dto.name },
+    });
+    return this.toResponse(user);
+  }
+
+  async changePassword(userId: string, dto: ChangePasswordDto): Promise<void> {
+    const user = await this.prisma.client.user.findUniqueOrThrow({ where: { id: userId } });
+    const valid = await bcrypt.compare(dto.currentPassword, user.password);
+    if (!valid) throw new BadRequestException("รหัสผ่านปัจจุบันไม่ถูกต้อง");
+    const hashed = await bcrypt.hash(dto.newPassword, 10);
+    await this.prisma.client.user.update({ where: { id: userId }, data: { password: hashed } });
   }
 
   private toResponse(user: { id: string; email: string; name: string; createdAt: Date; updatedAt: Date }): UserResponse {

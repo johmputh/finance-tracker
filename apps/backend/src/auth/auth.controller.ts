@@ -1,5 +1,5 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from "@nestjs/common";
-import { LoginDto, RegisterDto, UserResponse } from "@finance-tracker/shared";
+import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post, UseGuards } from "@nestjs/common";
+import { ChangePasswordDto, LoginDto, RegisterDto, UpdateProfileDto, UserResponse } from "@finance-tracker/shared";
 import { AuthService } from "./auth.service";
 import { CurrentUser } from "./current-user.decorator";
 import { JwtAuthGuard } from "./jwt-auth.guard";
@@ -23,5 +23,18 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   getProfile(@CurrentUser() userId: string): Promise<UserResponse> {
     return this.authService.getProfile(userId);
+  }
+
+  @Patch("me")
+  @UseGuards(JwtAuthGuard)
+  updateProfile(@CurrentUser() userId: string, @Body() dto: UpdateProfileDto): Promise<UserResponse> {
+    return this.authService.updateProfile(userId, dto);
+  }
+
+  @Patch("me/password")
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  changePassword(@CurrentUser() userId: string, @Body() dto: ChangePasswordDto): Promise<void> {
+    return this.authService.changePassword(userId, dto);
   }
 }

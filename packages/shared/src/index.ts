@@ -2,6 +2,8 @@ export * from "./common/paginated-response";
 export * from "./auth/register.dto";
 export * from "./auth/login.dto";
 export * from "./auth/user.response";
+export * from "./auth/update-profile.dto";
+export * from "./auth/change-password.dto";
 export * from "./category/create-category.dto";
 export * from "./category/update-category.dto";
 export * from "./category/find-categories-query.dto";

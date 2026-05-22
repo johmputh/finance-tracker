@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from "./lib/auth";
 import { Categories } from "./pages/Categories";
 import { Dashboard } from "./pages/Dashboard";
 import { Login } from "./pages/Login";
+import { Profile } from "./pages/Profile";
 import { Transactions } from "./pages/Transactions";
 
 function ProtectedRoute() {
@@ -30,6 +31,7 @@ export function App() {
               <Route index element={<Dashboard />} />
               <Route path="transactions" element={<Transactions />} />
               <Route path="categories" element={<Categories />} />
+              <Route path="profile" element={<Profile />} />
             </Route>
           </Route>
         </Routes>
