@@ -1,14 +1,16 @@
 import { NavLink } from "react-router-dom";
 
 const navItems = [
-  { to: "/", label: "Dashboard" },
-  { to: "/transactions", label: "Transactions" },
+  { to: "/", label: "แดชบอร์ด" },
+  { to: "/transactions", label: "รายการ" },
 ];
 
 export function Sidebar() {
   return (
-    <aside className="w-60 shrink-0 bg-slate-900 text-slate-100 p-4 flex flex-col">
-      <h1 className="text-xl font-bold mb-6">Finance Tracker</h1>
+    <aside className="w-56 shrink-0 bg-zinc-900 border-r border-zinc-800 p-4 flex flex-col">
+      <h1 className="font-bold text-xl text-zinc-100 mb-8 tracking-tight font-kanit">
+        Finance Tracker
+      </h1>
       <nav className="flex flex-col gap-1">
         {navItems.map((item) => (
           <NavLink
@@ -16,10 +18,10 @@ export function Sidebar() {
             to={item.to}
             end={item.to === "/"}
             className={({ isActive }) =>
-              `px-3 py-2 rounded text-sm transition ${
+              `px-3 py-2 rounded-lg text-sm transition-colors duration-200 ${
                 isActive
-                  ? "bg-slate-700 text-white"
-                  : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                  ? "bg-zinc-700 text-zinc-100"
+                  : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
               }`
             }
           >
