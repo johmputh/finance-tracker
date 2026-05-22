@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 const navItems = [
   { to: "/", label: "แดชบอร์ด" },
   { to: "/transactions", label: "รายการ" },
+  { to: "/categories", label: "หมวดหมู่" },
 ];
 
 export function Sidebar() {

@@ -7,6 +7,16 @@ import type {
 
 const BASE = "/api";
 
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const token = localStorage.getItem("token");
   const res = await fetch(`${BASE}${path}`, {
@@ -17,11 +27,18 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       ...init?.headers,
     },
   });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({})) as { message?: string };
-    throw new Error(body.message ?? res.statusText);
+  const text = await res.text();
+  let body: Record<string, unknown> = {};
+  try {
+    if (text) body = JSON.parse(text) as Record<string, unknown>;
+  } catch {
+    // ignore non-JSON bodies
   }
-  return res.json() as Promise<T>;
+  if (!res.ok) {
+    const message = typeof body.message === "string" ? body.message : res.statusText;
+    throw new ApiError(message, res.status);
+  }
+  return body as T;
 }
 
 export const api = {
@@ -35,6 +52,21 @@ export const api = {
 
   getCategories: (type?: string) =>
     request<CategoryResponse[]>(`/categories${type ? `?type=${type}` : ""}`),
+
+  createCategory: (data: { name: string; icon: string; type: string }) =>
+    request<CategoryResponse>("/categories", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  updateCategory: (id: string, data: { name?: string; icon?: string }) =>
+    request<CategoryResponse>(`/categories/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+
+  deleteCategory: (id: string) =>
+    request<void>(`/categories/${id}`, { method: "DELETE" }),
 
   createTransaction: (data: {
     amount: number;
