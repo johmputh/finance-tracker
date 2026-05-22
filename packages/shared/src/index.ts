@@ -1,4 +1,7 @@
 export * from "./common/paginated-response";
+export * from "./auth/register.dto";
+export * from "./auth/login.dto";
+export * from "./auth/user.response";
 export * from "./transaction/transaction-type.enum";
 export * from "./transaction/transaction-source.enum";
 export * from "./transaction/create-transaction.dto";
