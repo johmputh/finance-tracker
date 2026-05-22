@@ -11,4 +11,6 @@ export * from "./transaction/transaction-source.enum";
 export * from "./transaction/create-transaction.dto";
 export * from "./transaction/update-transaction.dto";
 export * from "./transaction/find-transactions-query.dto";
+export * from "./transaction/transaction-summary-query.dto";
+export * from "./transaction/transaction-summary.response";
 export * from "./transaction/transaction.response";

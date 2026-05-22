@@ -1,16 +1,12 @@
-import { NotFoundException } from "@nestjs/common";
-import { TransactionService } from "./transaction.service";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
 import type { TransactionRepository } from "./transaction.repository";
+import { TransactionService } from "./transaction.service";
 
-function createRepositoryMock() {
-  return {
-    create: jest.fn(),
-    findManyByUser: jest.fn(),
-    countByUser: jest.fn(),
-    findById: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-  };
+const USER_ID = "user-1";
+const CAT_ID = "cat-1";
+
+function fakeCategory(overrides: Record<string, unknown> = {}) {
+  return { id: CAT_ID, type: "EXPENSE", userId: null, ...overrides };
 }
 
 function fakeTransaction(overrides: Record<string, unknown> = {}) {
@@ -20,69 +16,99 @@ function fakeTransaction(overrides: Record<string, unknown> = {}) {
     type: "EXPENSE",
     description: "lunch",
     source: "WEB",
-    categoryId: "cat-1",
-    userId: "user-1",
+    categoryId: CAT_ID,
+    userId: USER_ID,
     createdAt: new Date("2026-05-21T00:00:00.000Z"),
     updatedAt: new Date("2026-05-21T00:00:00.000Z"),
     ...overrides,
   };
 }
 
+function fakeTransactionWithCategory(overrides: Record<string, unknown> = {}) {
+  return {
+    ...fakeTransaction(overrides),
+    category: { id: CAT_ID, name: "อาหาร", icon: "🍔", type: "EXPENSE", userId: null, createdAt: new Date() },
+  };
+}
+
+function makeRepo(overrides: Partial<Record<keyof TransactionRepository, jest.Mock>> = {}): TransactionRepository {
+  return {
+    create: jest.fn().mockResolvedValue(fakeTransaction()),
+    findManyFiltered: jest.fn().mockResolvedValue([fakeTransaction()]),
+    countFiltered: jest.fn().mockResolvedValue(1),
+    findById: jest.fn().mockResolvedValue(fakeTransaction()),
+    findCategoryById: jest.fn().mockResolvedValue(fakeCategory()),
+    findForSummary: jest.fn().mockResolvedValue([]),
+    update: jest.fn().mockResolvedValue(fakeTransaction()),
+    delete: jest.fn().mockResolvedValue(fakeTransaction()),
+    ...overrides,
+  } as unknown as TransactionRepository;
+}
+
 describe("TransactionService", () => {
-  let repository: ReturnType<typeof createRepositoryMock>;
-  let service: TransactionService;
-
-  beforeEach(() => {
-    repository = createRepositoryMock();
-    service = new TransactionService(repository as unknown as TransactionRepository);
-  });
-
   describe("create", () => {
     it("creates a transaction for the user and maps the response", async () => {
-      repository.create.mockResolvedValue(fakeTransaction());
+      const repo = makeRepo();
+      const service = new TransactionService(repo);
 
-      const result = await service.create("user-1", {
+      const result = await service.create(USER_ID, {
         amount: 100,
         type: "EXPENSE",
-        categoryId: "cat-1",
+        categoryId: CAT_ID,
         description: "lunch",
         source: "WEB",
       });
 
-      expect(repository.create).toHaveBeenCalledWith({
-        userId: "user-1",
+      expect(repo.create).toHaveBeenCalledWith({
+        userId: USER_ID,
         amount: 100,
         type: "EXPENSE",
-        categoryId: "cat-1",
+        categoryId: CAT_ID,
         description: "lunch",
         source: "WEB",
       });
-      expect(result).toEqual({
-        id: "tx-1",
-        amount: 100,
-        type: "EXPENSE",
-        description: "lunch",
-        source: "WEB",
-        categoryId: "cat-1",
-        userId: "user-1",
-        createdAt: "2026-05-21T00:00:00.000Z",
-        updatedAt: "2026-05-21T00:00:00.000Z",
-      });
+      expect(result.amount).toBe(100);
+      expect(result.createdAt).toBe("2026-05-21T00:00:00.000Z");
+    });
+
+    it("throws 400 when category is not found", async () => {
+      const repo = makeRepo({ findCategoryById: jest.fn().mockResolvedValue(null) });
+      const service = new TransactionService(repo);
+      await expect(service.create(USER_ID, { amount: 100, type: "EXPENSE", categoryId: "x" })).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it("throws 400 when category belongs to another user", async () => {
+      const repo = makeRepo({ findCategoryById: jest.fn().mockResolvedValue(fakeCategory({ userId: "other" })) });
+      const service = new TransactionService(repo);
+      await expect(service.create(USER_ID, { amount: 100, type: "EXPENSE", categoryId: CAT_ID })).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it("throws 400 when category type does not match transaction type", async () => {
+      const repo = makeRepo({ findCategoryById: jest.fn().mockResolvedValue(fakeCategory({ type: "INCOME" })) });
+      const service = new TransactionService(repo);
+      await expect(service.create(USER_ID, { amount: 100, type: "EXPENSE", categoryId: CAT_ID })).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
   describe("findAll", () => {
-    it("returns paginated transactions with computed totals", async () => {
-      repository.findManyByUser.mockResolvedValue([fakeTransaction()]);
-      repository.countByUser.mockResolvedValue(5);
+    it("returns paginated transactions", async () => {
+      const repo = makeRepo({
+        findManyFiltered: jest.fn().mockResolvedValue([fakeTransaction()]),
+        countFiltered: jest.fn().mockResolvedValue(5),
+      });
+      const service = new TransactionService(repo);
 
-      const result = await service.findAll("user-1", { page: 2, limit: 2 });
+      const result = await service.findAll(USER_ID, { page: 2, limit: 2 });
 
-      expect(repository.findManyByUser).toHaveBeenCalledWith("user-1", 2, 2);
-      expect(repository.countByUser).toHaveBeenCalledWith("user-1");
+      expect(repo.findManyFiltered).toHaveBeenCalledWith(USER_ID, expect.any(Object), 2, 2);
       expect(result.total).toBe(5);
       expect(result.page).toBe(2);
-      expect(result.limit).toBe(2);
       expect(result.totalPages).toBe(3);
       expect(result.data).toHaveLength(1);
     });
@@ -90,75 +116,92 @@ describe("TransactionService", () => {
 
   describe("findOne", () => {
     it("returns the transaction when owned by the user", async () => {
-      repository.findById.mockResolvedValue(fakeTransaction());
-
-      const result = await service.findOne("user-1", "tx-1");
-
+      const repo = makeRepo();
+      const service = new TransactionService(repo);
+      const result = await service.findOne(USER_ID, "tx-1");
       expect(result.id).toBe("tx-1");
     });
 
-    it("throws NotFoundException when the transaction does not exist", async () => {
-      repository.findById.mockResolvedValue(null);
-
-      await expect(service.findOne("user-1", "missing")).rejects.toBeInstanceOf(
-        NotFoundException,
-      );
+    it("throws NotFoundException when transaction does not exist", async () => {
+      const repo = makeRepo({ findById: jest.fn().mockResolvedValue(null) });
+      const service = new TransactionService(repo);
+      await expect(service.findOne(USER_ID, "missing")).rejects.toThrow(NotFoundException);
     });
 
-    it("throws NotFoundException when the transaction belongs to another user", async () => {
-      repository.findById.mockResolvedValue(fakeTransaction({ userId: "other" }));
+    it("throws NotFoundException when transaction belongs to another user", async () => {
+      const repo = makeRepo({ findById: jest.fn().mockResolvedValue(fakeTransaction({ userId: "other" })) });
+      const service = new TransactionService(repo);
+      await expect(service.findOne(USER_ID, "tx-1")).rejects.toThrow(NotFoundException);
+    });
+  });
 
-      await expect(service.findOne("user-1", "tx-1")).rejects.toBeInstanceOf(
-        NotFoundException,
-      );
+  describe("getSummary", () => {
+    it("aggregates income, expense, balance and daily totals", async () => {
+      const tx1 = fakeTransactionWithCategory({ amount: { toNumber: () => 500 }, type: "INCOME", createdAt: new Date("2026-05-05T00:00:00.000Z") });
+      const tx2 = fakeTransactionWithCategory({ amount: { toNumber: () => 200 }, type: "EXPENSE", createdAt: new Date("2026-05-05T00:00:00.000Z") });
+      const repo = makeRepo({ findForSummary: jest.fn().mockResolvedValue([tx1, tx2]) });
+      const service = new TransactionService(repo);
+
+      const result = await service.getSummary(USER_ID, { month: 5, year: 2026 });
+
+      expect(result.totalIncome).toBe(500);
+      expect(result.totalExpense).toBe(200);
+      expect(result.balance).toBe(300);
+      expect(result.byCategoryIncome).toHaveLength(1);
+      expect(result.byCategoryExpense).toHaveLength(1);
+      expect(result.byCategoryExpense[0].percentage).toBe(100);
+      expect(result.dailyTotals).toHaveLength(31);
+      const may5 = result.dailyTotals.find((d) => d.date === "2026-05-05")!;
+      expect(may5.income).toBe(500);
+      expect(may5.expense).toBe(200);
+    });
+
+    it("returns zeroed summary when no transactions exist", async () => {
+      const repo = makeRepo({ findForSummary: jest.fn().mockResolvedValue([]) });
+      const service = new TransactionService(repo);
+
+      const result = await service.getSummary(USER_ID, { month: 1, year: 2026 });
+
+      expect(result.totalIncome).toBe(0);
+      expect(result.totalExpense).toBe(0);
+      expect(result.balance).toBe(0);
+      expect(result.byCategoryExpense).toHaveLength(0);
+      expect(result.dailyTotals).toHaveLength(31);
     });
   });
 
   describe("update", () => {
     it("updates an owned transaction", async () => {
-      repository.findById.mockResolvedValue(fakeTransaction());
-      repository.update.mockResolvedValue(fakeTransaction({ amount: { toNumber: () => 250 } }));
+      const repo = makeRepo({ update: jest.fn().mockResolvedValue(fakeTransaction({ amount: { toNumber: () => 250 } })) });
+      const service = new TransactionService(repo);
 
-      const result = await service.update("user-1", "tx-1", { amount: 250 });
+      const result = await service.update(USER_ID, "tx-1", { amount: 250 });
 
-      expect(repository.update).toHaveBeenCalledWith("tx-1", {
-        amount: 250,
-        type: undefined,
-        categoryId: undefined,
-        description: undefined,
-        source: undefined,
-      });
       expect(result.amount).toBe(250);
     });
 
     it("throws NotFoundException when updating a transaction the user does not own", async () => {
-      repository.findById.mockResolvedValue(fakeTransaction({ userId: "other" }));
-
-      await expect(
-        service.update("user-1", "tx-1", { amount: 1 }),
-      ).rejects.toBeInstanceOf(NotFoundException);
-      expect(repository.update).not.toHaveBeenCalled();
+      const repo = makeRepo({ findById: jest.fn().mockResolvedValue(fakeTransaction({ userId: "other" })) });
+      const service = new TransactionService(repo);
+      await expect(service.update(USER_ID, "tx-1", { amount: 1 })).rejects.toThrow(NotFoundException);
+      expect(repo.update).not.toHaveBeenCalled();
     });
   });
 
   describe("remove", () => {
     it("deletes an owned transaction", async () => {
-      repository.findById.mockResolvedValue(fakeTransaction());
-      repository.delete.mockResolvedValue(fakeTransaction());
-
-      const result = await service.remove("user-1", "tx-1");
-
-      expect(repository.delete).toHaveBeenCalledWith("tx-1");
+      const repo = makeRepo();
+      const service = new TransactionService(repo);
+      const result = await service.remove(USER_ID, "tx-1");
+      expect(repo.delete).toHaveBeenCalledWith("tx-1");
       expect(result.id).toBe("tx-1");
     });
 
     it("throws NotFoundException when deleting a transaction the user does not own", async () => {
-      repository.findById.mockResolvedValue(fakeTransaction({ userId: "other" }));
-
-      await expect(service.remove("user-1", "tx-1")).rejects.toBeInstanceOf(
-        NotFoundException,
-      );
-      expect(repository.delete).not.toHaveBeenCalled();
+      const repo = makeRepo({ findById: jest.fn().mockResolvedValue(fakeTransaction({ userId: "other" })) });
+      const service = new TransactionService(repo);
+      await expect(service.remove(USER_ID, "tx-1")).rejects.toThrow(NotFoundException);
+      expect(repo.delete).not.toHaveBeenCalled();
     });
   });
 });

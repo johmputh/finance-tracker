@@ -1,17 +1,8 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-  UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import {
   CreateTransactionDto,
   FindTransactionsQueryDto,
+  TransactionSummaryQueryDto,
   UpdateTransactionDto,
 } from "@finance-tracker/shared";
 import { CurrentUser } from "../auth/current-user.decorator";
@@ -33,17 +24,18 @@ export class TransactionController {
     return this.transactionService.findAll(userId, query);
   }
 
+  @Get("summary")
+  getSummary(@CurrentUser() userId: string, @Query() query: TransactionSummaryQueryDto) {
+    return this.transactionService.getSummary(userId, query);
+  }
+
   @Get(":id")
   findOne(@CurrentUser() userId: string, @Param("id") id: string) {
     return this.transactionService.findOne(userId, id);
   }
 
   @Patch(":id")
-  update(
-    @CurrentUser() userId: string,
-    @Param("id") id: string,
-    @Body() dto: UpdateTransactionDto,
-  ) {
+  update(@CurrentUser() userId: string, @Param("id") id: string, @Body() dto: UpdateTransactionDto) {
     return this.transactionService.update(userId, id, dto);
   }
 
