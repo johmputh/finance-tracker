@@ -35,4 +35,33 @@ export const api = {
 
   getCategories: (type?: string) =>
     request<CategoryResponse[]>(`/categories${type ? `?type=${type}` : ""}`),
+
+  createTransaction: (data: {
+    amount: number;
+    type: string;
+    categoryId: string;
+    description?: string;
+    source: string;
+  }) =>
+    request<TransactionResponse>("/transactions", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  updateTransaction: (
+    id: string,
+    data: {
+      amount?: number;
+      type?: string;
+      categoryId?: string;
+      description?: string;
+    },
+  ) =>
+    request<TransactionResponse>(`/transactions/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+
+  deleteTransaction: (id: string) =>
+    request<TransactionResponse>(`/transactions/${id}`, { method: "DELETE" }),
 };
