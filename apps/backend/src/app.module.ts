@@ -3,6 +3,7 @@ import { ConfigModule } from "@nestjs/config";
 import { join } from "node:path";
 import { AppController } from "./app.controller";
 import { AuthModule } from "./auth/auth.module";
+import { CategoryModule } from "./category/category.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { TransactionModule } from "./transaction/transaction.module";
 
@@ -14,6 +15,7 @@ import { TransactionModule } from "./transaction/transaction.module";
     }),
     PrismaModule,
     AuthModule,
+    CategoryModule,
     TransactionModule,
   ],
   controllers: [AppController],
