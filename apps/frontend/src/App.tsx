@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom
 import { Toaster } from "react-hot-toast";
 import { Layout } from "./components/Layout";
 import { AuthProvider, useAuth } from "./lib/auth";
+import { Budget } from "./pages/Budget";
 import { Categories } from "./pages/Categories";
 import { Dashboard } from "./pages/Dashboard";
 import { Login } from "./pages/Login";
@@ -31,6 +32,7 @@ export function App() {
             <Route element={<Layout />}>
               <Route index element={<Dashboard />} />
               <Route path="transactions" element={<Transactions />} />
+              <Route path="budget" element={<Budget />} />
               <Route path="categories" element={<Categories />} />
               <Route path="recurring" element={<Recurring />} />
               <Route path="profile" element={<Profile />} />

@@ -9,6 +9,7 @@ interface SidebarProps {
 const navItems = [
   { to: "/", label: "แดชบอร์ด" },
   { to: "/transactions", label: "รายการ" },
+  { to: "/budget", label: "งบประมาณ" },
   { to: "/categories", label: "หมวดหมู่" },
   { to: "/recurring", label: "รายการประจำ" },
   { to: "/profile", label: "โปรไฟล์" },

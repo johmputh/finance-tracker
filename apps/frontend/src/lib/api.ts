@@ -1,4 +1,5 @@
 import type {
+  BudgetStatusResponse,
   CategoryResponse,
   PaginatedResponse,
   RecurringResponse,
@@ -141,4 +142,13 @@ export const api = {
 
   deleteRecurring: (id: string) =>
     request<RecurringResponse>(`/recurring/${id}`, { method: "DELETE" }),
+
+  getBudgetStatus: (month: number, year: number) =>
+    request<BudgetStatusResponse>(`/budget?month=${month}&year=${year}`),
+
+  setBudget: (data: { amount: number; categoryId: string; month: number; year: number }) =>
+    request<Record<string, unknown>>("/budget", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 };
