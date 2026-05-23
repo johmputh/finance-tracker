@@ -28,6 +28,7 @@ model User {
   transactions Transaction[]
   categories   Category[]
   recurrings   Recurring[]
+  budgets      Budget[]
 }
 
 model Category {
@@ -39,6 +40,7 @@ model Category {
   user         User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
   recurrings   Recurring[]
+  budgets      Budget[]
   createdAt    DateTime        @default(now())
 
   @@unique([name, type, userId])
@@ -59,6 +61,22 @@ model Recurring {
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 
+  @@index([userId])
+}
+
+model Budget {
+  id         String          @id @default(cuid())
+  amount     Decimal         @db.Decimal(12, 2)
+  month      Int
+  year       Int
+  userId     String
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId String
+  category   Category        @relation(fields: [categoryId], references: [id])
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@unique([userId, categoryId, month, year])
   @@index([userId])
 }
 

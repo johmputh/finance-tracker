@@ -4,6 +4,7 @@ import { ScheduleModule } from "@nestjs/schedule";
 import { join } from "node:path";
 import { AppController } from "./app.controller";
 import { AuthModule } from "./auth/auth.module";
+import { BudgetModule } from "./budget/budget.module";
 import { CategoryModule } from "./category/category.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { RecurringModule } from "./recurring/recurring.module";
@@ -21,6 +22,7 @@ import { TransactionModule } from "./transaction/transaction.module";
     CategoryModule,
     TransactionModule,
     RecurringModule,
+    BudgetModule,
   ],
   controllers: [AppController],
 })
