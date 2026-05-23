@@ -19,3 +19,6 @@ export * from "./transaction/transaction.response";
 export * from "./recurring/create-recurring.dto";
 export * from "./recurring/update-recurring.dto";
 export * from "./recurring/recurring.response";
+export * from "./budget/create-budget.dto";
+export * from "./budget/update-budget.dto";
+export * from "./budget/budget-status.response";
