@@ -1,4 +1,4 @@
-import { IsBoolean, IsIn, IsInt, IsOptional, IsString, Max, Min } from "class-validator";
+import { IsBoolean, IsIn, IsInt, IsNumber, IsOptional, IsString, Max, Min } from "class-validator";
 
 export class UpdateRecurringDto {
   @IsOptional()
@@ -6,6 +6,7 @@ export class UpdateRecurringDto {
   type?: string;
 
   @IsOptional()
+  @IsNumber()
   @Min(1)
   amount?: number;
 
