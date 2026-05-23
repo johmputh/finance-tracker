@@ -6,6 +6,7 @@ import { Categories } from "./pages/Categories";
 import { Dashboard } from "./pages/Dashboard";
 import { Login } from "./pages/Login";
 import { Profile } from "./pages/Profile";
+import { Recurring } from "./pages/Recurring";
 import { Transactions } from "./pages/Transactions";
 
 function ProtectedRoute() {
@@ -31,6 +32,7 @@ export function App() {
               <Route index element={<Dashboard />} />
               <Route path="transactions" element={<Transactions />} />
               <Route path="categories" element={<Categories />} />
+              <Route path="recurring" element={<Recurring />} />
               <Route path="profile" element={<Profile />} />
             </Route>
           </Route>

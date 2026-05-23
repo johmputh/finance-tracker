@@ -16,3 +16,6 @@ export * from "./transaction/find-transactions-query.dto";
 export * from "./transaction/transaction-summary-query.dto";
 export * from "./transaction/transaction-summary.response";
 export * from "./transaction/transaction.response";
+export * from "./recurring/create-recurring.dto";
+export * from "./recurring/update-recurring.dto";
+export * from "./recurring/recurring.response";

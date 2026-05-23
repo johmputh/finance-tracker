@@ -10,6 +10,7 @@ const navItems = [
   { to: "/", label: "แดชบอร์ด" },
   { to: "/transactions", label: "รายการ" },
   { to: "/categories", label: "หมวดหมู่" },
+  { to: "/recurring", label: "รายการประจำ" },
   { to: "/profile", label: "โปรไฟล์" },
 ];
 

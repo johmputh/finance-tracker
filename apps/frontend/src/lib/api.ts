@@ -1,6 +1,7 @@
 import type {
   CategoryResponse,
   PaginatedResponse,
+  RecurringResponse,
   TransactionResponse,
   TransactionSummaryResponse,
   UserResponse,
@@ -123,4 +124,21 @@ export const api = {
 
   deleteTransaction: (id: string) =>
     request<TransactionResponse>(`/transactions/${id}`, { method: "DELETE" }),
+
+  getRecurrings: () => request<RecurringResponse[]>("/recurring"),
+
+  createRecurring: (data: { type: string; amount: number; categoryId: string; description?: string; dayOfMonth: number }) =>
+    request<RecurringResponse>("/recurring", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  updateRecurring: (id: string, data: { type?: string; amount?: number; categoryId?: string; description?: string; dayOfMonth?: number; active?: boolean }) =>
+    request<RecurringResponse>(`/recurring/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+
+  deleteRecurring: (id: string) =>
+    request<RecurringResponse>(`/recurring/${id}`, { method: "DELETE" }),
 };
