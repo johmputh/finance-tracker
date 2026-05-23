@@ -51,10 +51,23 @@ pnpm db:studio                # Prisma Studio GUI
 - Controllers handle HTTP only. Services hold business logic. Repositories wrap the Prisma client.
 - **Never call the Prisma client directly in a Service.** All DB access goes through a Repository that wraps Prisma.
 - The API is served under the **`/api`** prefix.
+- **Every feature module that uses `JwtAuthGuard` must import `AuthModule`.**
+- **DTO classes used in `@Body()` must be value imports, not `import type`** — class-validator needs the class reference at runtime.
+
+### Backend modules
+
+| Module | Routes |
+|---|---|
+| AuthModule | POST /auth/login, /auth/register, GET /auth/me, PATCH /auth/me, PATCH /auth/me/password |
+| CategoryModule | CRUD /categories |
+| TransactionModule | CRUD /transactions, GET /transactions/summary |
+| RecurringModule | CRUD /recurring, POST /recurring/trigger |
+| BudgetModule | POST /budget, GET /budget?month=&year=, DELETE /budget/:id |
 
 ### Frontend
 
-- Style with **Tailwind utility classes only**. No inline `style={{ ... }}`.
+- Style with **Tailwind utility classes only**. No inline `style={{ ... }}` except dynamic width on progress bars.
+- The `Modal` component has **no `isOpen` prop** — use conditional rendering: `{condition && <Modal>}`.
 
 ### packages/shared — the client/server wire contract
 
