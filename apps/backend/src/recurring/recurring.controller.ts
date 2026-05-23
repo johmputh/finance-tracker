@@ -38,4 +38,9 @@ export class RecurringController {
   remove(@CurrentUser() userId: string, @Param("id") id: string): Promise<RecurringResponse> {
     return this.service.remove(userId, id);
   }
+
+  @Post("trigger")
+  triggerProcessing(@Body("day") day?: number): Promise<void> {
+    return this.service.processRecurring(day);
+  }
 }

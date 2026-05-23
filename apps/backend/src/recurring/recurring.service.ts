@@ -60,9 +60,9 @@ export class RecurringService {
   }
 
   @Cron("1 0 * * *")
-  async processRecurring(): Promise<void> {
+  async processRecurring(dayOverride?: number): Promise<void> {
     const today = new Date();
-    const dayOfMonth = today.getDate();
+    const dayOfMonth = dayOverride ?? today.getDate();
     this.logger.log(`Processing recurring transactions for day ${dayOfMonth}`);
 
     const recurrings = await this.repository.findActiveByDayOfMonth(dayOfMonth);
