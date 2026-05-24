@@ -7,6 +7,7 @@ import { AuthModule } from "./auth/auth.module";
 import { BudgetModule } from "./budget/budget.module";
 import { CategoryModule } from "./category/category.module";
 import { PrismaModule } from "./prisma/prisma.module";
+import { LineModule } from "./line/line.module";
 import { RecurringModule } from "./recurring/recurring.module";
 import { TransactionModule } from "./transaction/transaction.module";
 
@@ -23,6 +24,7 @@ import { TransactionModule } from "./transaction/transaction.module";
     TransactionModule,
     RecurringModule,
     BudgetModule,
+    LineModule,
   ],
   controllers: [AppController],
 })
