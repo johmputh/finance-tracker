@@ -13,6 +13,7 @@ const navItems = [
   { to: "/categories", label: "หมวดหมู่" },
   { to: "/recurring", label: "รายการประจำ" },
   { to: "/profile", label: "โปรไฟล์" },
+  { to: "/settings", label: "ตั้งค่า" },
 ];
 
 export function Sidebar({ isOpen, onToggle }: SidebarProps) {

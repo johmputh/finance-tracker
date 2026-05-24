@@ -143,6 +143,9 @@ export const api = {
   deleteRecurring: (id: string) =>
     request<RecurringResponse>(`/recurring/${id}`, { method: "DELETE" }),
 
+  requestLinkCode: () =>
+    request<{ code: string; expiresAt: string }>("/link/code", { method: "POST" }),
+
   getBudgetStatus: (month: number, year: number) =>
     request<BudgetStatusResponse>(`/budget?month=${month}&year=${year}`),
 

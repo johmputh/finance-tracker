@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { CategoryModule } from "../category/category.module";
+import { LinkModule } from "../link/link.module";
 import { AutoCategorizerService } from "./categorizer/auto-categorizer.service";
 import { LineSignatureGuard } from "./line-signature.guard";
 import { LineController } from "./line.controller";
@@ -7,7 +8,7 @@ import { LineRepository } from "./line.repository";
 import { LineService } from "./line.service";
 
 @Module({
-  imports: [CategoryModule],
+  imports: [CategoryModule, LinkModule],
   controllers: [LineController],
   providers: [LineService, LineRepository, LineSignatureGuard, AutoCategorizerService],
   exports: [LineService],

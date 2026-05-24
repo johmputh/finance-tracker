@@ -2,6 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { messagingApi, webhook } from "@line/bot-sdk";
 import { TransactionSource, TransactionType } from "@finance-tracker/shared";
+import { LinkService } from "../link/link.service";
 import { AutoCategorizerService } from "./categorizer/auto-categorizer.service";
 import { LineRepository, type TransactionWithCategory } from "./line.repository";
 import { parseLineMessage } from "./parsers/line-message.parser";
@@ -23,6 +24,7 @@ export class LineService {
     private readonly config: ConfigService,
     private readonly lineRepository: LineRepository,
     private readonly autoCategorizer: AutoCategorizerService,
+    private readonly linkService: LinkService,
   ) {
     this.client = new messagingApi.MessagingApiClient({
       channelAccessToken: this.config.getOrThrow<string>("LINE_CHANNEL_ACCESS_TOKEN"),
@@ -44,6 +46,13 @@ export class LineService {
     if (!replyToken) return;
 
     try {
+      const linkMatch = text.match(/^เชื่อม\s+(\d{6})$/);
+      if (linkMatch) {
+        const reply = await this.handleLink(lineUserId, linkMatch[1]);
+        await this.client.replyMessage({ replyToken, messages: [{ type: "text", text: reply }] });
+        return;
+      }
+
       const user = await this.lineRepository.findOrCreateLineUser(lineUserId);
       const reply = await this.processText(user.id, text);
       await this.client.replyMessage({ replyToken, messages: [{ type: "text", text: reply }] });
@@ -105,6 +114,15 @@ export class LineService {
     await this.lineRepository.deleteTransaction(latest.id);
     const label = latest.description ?? latest.category.name;
     return `🗑 ยกเลิกแล้ว: ${label} ${formatAmount(latest.amount.toNumber())}`;
+  }
+
+  private async handleLink(lineUserId: string, code: string): Promise<string> {
+    try {
+      await this.linkService.linkAccount(lineUserId, code);
+      return "✅ เชื่อมบัญชีเรียบร้อย ตอนนี้รายการของคุณจะซิงค์กับ web app แล้ว";
+    } catch (err) {
+      return `❌ ${(err as Error).message}`;
+    }
   }
 
   private helpMessage(): string {
