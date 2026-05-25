@@ -24,9 +24,12 @@ export class LinkService {
     const lineUser = await this.repository.findUserByLineId(lineUserId);
     if (!lineUser) throw new BadRequestException("ไม่พบบัญชี LINE");
 
-    await this.repository.moveTransactions(lineUser.id, linkCode.userId);
-    await this.repository.deleteUser(lineUser.id);
-    await this.repository.updateUserLineId(linkCode.userId, lineUserId);
+    if (lineUser.id !== linkCode.userId) {
+      await this.repository.moveTransactions(lineUser.id, linkCode.userId);
+      await this.repository.deleteUser(lineUser.id);
+      await this.repository.updateUserLineId(linkCode.userId, lineUserId);
+    }
+
     await this.repository.markUsed(linkCode.id);
   }
 }
