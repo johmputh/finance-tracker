@@ -14,10 +14,11 @@ export class LineSignatureGuard implements CanActivate {
 
     if (!signature) throw new UnauthorizedException("Missing x-line-signature header");
 
-    const channelSecret = this.config.getOrThrow<string>("LINE_CHANNEL_SECRET");
-    const body = req.rawBody ?? Buffer.from(JSON.stringify(req.body));
+    if (!req.rawBody) throw new UnauthorizedException("Raw body unavailable — signature cannot be verified");
 
-    if (!validateSignature(body, channelSecret, signature)) {
+    const channelSecret = this.config.getOrThrow<string>("LINE_CHANNEL_SECRET");
+
+    if (!validateSignature(req.rawBody, channelSecret, signature)) {
       throw new UnauthorizedException("Invalid LINE signature");
     }
 

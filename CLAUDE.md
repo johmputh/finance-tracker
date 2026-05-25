@@ -89,3 +89,30 @@ Never put in `packages/shared`:
 - Naming: `camelCase` variables, `PascalCase` types, `kebab-case` file names.
 - **Jest** tests live next to the source file they cover (`foo.ts` -> `foo.spec.ts`).
 - **1 prompt = 1 commit.** Verify the build passes before every commit. Use **conventional commits** (`feat:`, `fix:`, `docs:`, `chore:`, ...).
+
+## Tech debt — pending refactor (medium/low severity)
+
+Identified by code-reviewer audits. Fix in a future session before going to production.
+
+### LINE webhook
+- [ ] Add rate limiting on `POST /api/line/webhook` (e.g. `@nestjs/throttler`) to prevent API cost amplification
+- [ ] `findOrCreateLineUser` is not atomic — wrap in upsert or catch unique constraint to handle concurrent first-message events
+- [ ] `LineService.client` should be `private readonly` (currently public, exposes reply surface)
+- [ ] Guard `event.message` cast at line 44 in `line.service.ts` — cast after replyToken guard to avoid throw on malformed events
+- [ ] Disable Swagger UI in production (`if (process.env.NODE_ENV !== 'production')`)
+
+### Thai parser
+- [ ] `ค่าเช่า` is ambiguous (rental income vs expense) — add context-based disambiguation or separate keyword
+- [ ] Add missing income keywords: `ดอกเบี้ย` (interest), `เงินปันผล` (dividend)
+- [ ] Cap `description` length before DB insert (LINE allows 5000 chars; `Transaction.description` is unbounded text)
+- [ ] Use `Decimal` constructor instead of `parseFloat` to avoid IEEE 754 precision loss on large amounts
+- [ ] Handle European-style decimal `1.500` → warn user or reject instead of silently storing ฿1.50
+
+### Categorizer
+- [ ] Add test coverage for `AutoCategorizerService` (cache hit, cache TTL expiry, OpenAI failure, fallback)
+- [ ] Make fallback category name configurable — currently hardcoded `"อื่นๆ"` / `"รายได้อื่นๆ"`, breaks if renamed
+
+### Link account flow
+- [ ] Clear old LINE auto-user when web user re-links to a different LINE account (ghost users accumulate)
+- [ ] Frontend `Settings.tsx` countdown should use `expiresAt` from API response, not a hardcoded 5-minute timer
+- [ ] Add test coverage for `LinkService` and `LinkRepository` (race condition, cascade delete, partial failure)

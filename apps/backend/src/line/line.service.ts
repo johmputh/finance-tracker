@@ -1,4 +1,4 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { BadRequestException, Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { messagingApi, webhook } from "@line/bot-sdk";
 import { TransactionSource, TransactionType } from "@finance-tracker/shared";
@@ -108,7 +108,7 @@ export class LineService {
   }
 
   private async handleCancel(userId: string): Promise<string> {
-    const latest = await this.lineRepository.findLatestTransaction(userId);
+    const latest = await this.lineRepository.findLatestLineTransaction(userId);
     if (!latest) return "❌ ไม่มีรายการที่จะยกเลิก";
 
     await this.lineRepository.deleteTransaction(latest.id);
@@ -121,7 +121,9 @@ export class LineService {
       await this.linkService.linkAccount(lineUserId, code);
       return "✅ เชื่อมบัญชีเรียบร้อย ตอนนี้รายการของคุณจะซิงค์กับ web app แล้ว";
     } catch (err) {
-      return `❌ ${(err as Error).message}`;
+      if (err instanceof BadRequestException) return `❌ ${err.message}`;
+      this.logger.error(`Link account failed: ${err}`);
+      return "❌ เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง";
     }
   }
 

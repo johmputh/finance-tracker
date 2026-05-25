@@ -36,9 +36,9 @@ export class LineRepository {
     }) as Promise<TransactionWithCategory>;
   }
 
-  findLatestTransaction(userId: string): Promise<TransactionWithCategory | null> {
+  findLatestLineTransaction(userId: string): Promise<TransactionWithCategory | null> {
     return this.prisma.client.transaction.findFirst({
-      where: { userId },
+      where: { userId, source: "LINE" },
       orderBy: { createdAt: "desc" },
       include: { category: true },
     }) as Promise<TransactionWithCategory | null>;

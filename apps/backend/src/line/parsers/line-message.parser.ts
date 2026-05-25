@@ -11,7 +11,8 @@ const INCOME_KEYWORDS = ["เงินเดือน", "รายได้", "�
 const MESSAGE_PATTERN = /^(.+)\s+([\d,]+(?:\.\d+)?)\s*$/;
 
 export function parseLineMessage(text: string): ParsedTransaction | null {
-  const match = text.trim().match(MESSAGE_PATTERN);
+  const normalized = text.trim().replace(/\s+(?:บาท\.?|บ\.)\s*$/, "");
+  const match = normalized.match(MESSAGE_PATTERN);
   if (!match) return null;
 
   const description = match[1].trim();
